@@ -1,0 +1,249 @@
+--- origsrc/gnash-0.8.6/backend/Makefile.am	2009-09-13 18:22:14.000000000 -0500
++++ src/gnash-0.8.6/backend/Makefile.am	2009-11-04 11:54:35.786516900 -0600
+@@ -84,7 +84,7 @@ noinst_LTLIBRARIES += libgnashagg.la
+ #plugins_LTLIBRARIES += libgnashagg.la
+ libgnashagg_la_SOURCES = Renderer_agg.cpp 
+ #libgnashagg_la_LDFLAGS = -module -avoid-version -no-undefined
+-libgnashagg_la_LIBADD = $(AGG_LIBS)
++libgnashagg_la_LIBADD = ../libcore/libgnashcore.la $(AGG_LIBS)
+ endif
+ endif
+ 
+--- origsrc/gnash-0.8.6/configure.ac	2009-09-13 19:13:12.000000000 -0500
++++ src/gnash-0.8.6/configure.ac	2009-11-04 02:48:04.918726100 -0600
+@@ -159,10 +159,14 @@ case "${host}" in
+     linux=yes
+     AC_DEFINE([LINUX_HOST], [1], [this is a Linux platform])
+     ;;
+-  *-cygwin* | *-mingw* | *-pw32*)
++  *-mingw* | *-pw32*)
+     windows=yes
+     AC_DEFINE([WIN32_HOST], [1], [this is a Win32 platform])
+     ;;
++  *-cygwin*)
++    cygwin=yes
++    AC_DEFINE([CYGWIN_HOST], [1], [this is a Cygwin platform])
++    ;;
+   *64-*-*bsd*)
+     bsd_os=bsd 
+     AC_DEFINE([WORDSIZE], [64], [this is a 64 platform])
+@@ -2107,7 +2111,7 @@ GNASH_PATH_CURL
+ 
+ dnl Define winsock if we're on windows. We could do something complicated,
+ dnl but since AC_EXEEXT does it for us, we'll do this the easy way.
+-if test x"$EXEEXT" = "exe"; then
++if test x"$windows" = "xyes"; then
+   AC_DEFINE(HAVE_WINSOCK,1,[This is defined is we are on Win32])
+ fi
+ 
+--- origsrc/gnash-0.8.6/libbase/Makefile.am	2009-09-13 18:22:23.000000000 -0500
++++ src/gnash-0.8.6/libbase/Makefile.am	2009-11-04 01:17:05.400686300 -0600
+@@ -76,7 +76,7 @@ libgnashbase_la_LIBADD = \
+ 	$(Z_LIBS) \
+ 	$(CURL_LIBS) \
+ 	$(OPENGL_LIBS) \
+-	$(LIBINTL) \
++	$(LTLIBINTL) \
+ 	$(BOOST_LIBS) \
+ 	$(PTHREAD_LIBS) \
+ 	$(LIBLTDL) \
+--- origsrc/gnash-0.8.6/libbase/extension.cpp	2009-09-13 18:22:16.000000000 -0500
++++ src/gnash-0.8.6/libbase/extension.cpp	2009-11-04 12:35:13.917768300 -0600
+@@ -244,7 +244,11 @@ Extension::scanDir(const std::string& di
+             const std::string suffix = name.substr(pos);
+             name.erase(pos);
+ 
++#ifdef __CYGWIN__
++            if (suffix == ".dll") {
++#else
+             if (suffix == ".so") {
++#endif
+                 log_debug(_("Gnash Plugin name: %s"), name);
+                 _modules.push_back(name);
+             }
+--- origsrc/gnash-0.8.6/libbase/jemalloc.c	2009-09-13 18:22:16.000000000 -0500
++++ src/gnash-0.8.6/libbase/jemalloc.c	2009-11-04 01:14:32.458019600 -0600
+@@ -238,13 +238,12 @@ typedef unsigned long long uintmax_t;
+ #  define __DECONST(type, var)	((type)(uintptr_t)(const void *)(var))
+ # endif
+ # include <sys/mman.h>
+-# ifndef MADV_FREE
+-#  define MADV_FREE	MADV_DONTNEED
+-# endif
+ # include <sys/param.h>
+ # include <sys/time.h>
+ # include <sys/types.h>
++#ifndef CYGWIN_HOST
+ # include <sys/sysctl.h>
++#endif
+ # include "jemtree.h"
+ # include <sys/uio.h>
+ 
+@@ -253,7 +252,7 @@ typedef unsigned long long uintmax_t;
+ # ifndef SIZE_T_MAX
+ #  define SIZE_T_MAX	SIZE_MAX
+ # endif
+-# if defined(DARWIN) || defined(LINUX_HOST)
++# if defined(DARWIN) || defined(LINUX_HOST) || defined(CYGWIN_HOST)
+ #  define _pthread_self pthread_self
+ #  define _pthread_mutex_init pthread_mutex_init
+ #  define _pthread_mutex_trylock pthread_mutex_trylock
+@@ -2380,7 +2379,7 @@ chunk_dealloc_dss(void *chunk, size_t si
+ 			mmap(chunk, size, PROT_READ | PROT_WRITE, MAP_PRIVATE
+ 			    | MAP_ANON | MAP_FIXED, -1, 0);
+ #else
+-			madvise(chunk, size, MADV_FREE);
++			posix_madvise(chunk, size, POSIX_MADV_DONTNEED);
+ #endif
+ 		}
+ 
+@@ -3102,9 +3101,9 @@ arena_purge(arena_t *arena)
+ 					arena->stats.decommitted += npages;
+ #  endif
+ #else
+-					madvise((void *)((uintptr_t)chunk + (i
++					posix_madvise((void *)((uintptr_t)chunk + (i
+ 					    << pagesize_2pow)), pagesize *
+-					    npages, MADV_FREE);
++					    npages, POSIX_MADV_DONTNEED);
+ #endif
+ #ifdef MALLOC_STATS
+ 					arena->stats.nmadvise++;
+--- origsrc/gnash-0.8.6/libmedia/Makefile.am	2009-09-13 18:22:17.000000000 -0500
++++ src/gnash-0.8.6/libmedia/Makefile.am	2009-11-04 01:23:25.152148400 -0600
+@@ -51,6 +51,7 @@ libgnashmedia_la_CPPFLAGS = \
+ # include_HEADERS = log.h err.h proc.h serial.h xantrex.h outback.h
+ 
+ libgnashmedia_la_LIBADD = \
++	../libbase/libgnashbase.la \
+ 	$(PNG_LIBS) \
+ 	$(JPEG_LIBS) \
+ 	$(GIF_LIBS) \
+--- origsrc/gnash-0.8.6/libsound/Makefile.am	2009-09-13 18:22:17.000000000 -0500
++++ src/gnash-0.8.6/libsound/Makefile.am	2009-11-04 01:26:20.402854000 -0600
+@@ -32,6 +32,8 @@ libgnashsound_la_CPPFLAGS = \
+ 	$(NULL)
+ 
+ libgnashsound_la_LIBADD = \
++	../libmedia/libgnashmedia.la \
++	../libbase/libgnashbase.la \
+ 	$(LIBLTDL) \
+ 	$(LIBLTDLHEAD) \
+ 	$(BOOST_LIBS) \
+--- origsrc/gnash-0.8.6/macros/kde4.m4	2009-09-13 18:22:17.000000000 -0500
++++ src/gnash-0.8.6/macros/kde4.m4	2009-11-04 03:02:23.732423600 -0600
+@@ -24,7 +24,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
+              with_kde4_incl=${withval})
+   dnl make sure the path is a useable one
+   if test x"${with_kde4_incl}" != x ; then
+-    if test ! -f ${with_kde4_incl}/kapp.h ; then
++    if test ! -f ${with_kde4_incl}/kapplication.h ; then
+       AC_MSG_ERROR([${with_kde4_incl} directory doesn't contain any KDE 4.x headers])
+     fi
+   fi
+@@ -38,7 +38,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
+              with_kde4_lib=${withval})
+   dnl make sure the path is a useable one
+   if test x"${with_kde4_lib}" != x ; then 
+-    if test ! -f ${with_kde4_lib}/libkdeui.la; then
++    if test ! -f ${with_kde4_lib}/libkdeui.dll.a; then
+       AC_MSG_ERROR([${with_kde4_lib} directory doesn't contain any KDE 4.x libraries!])
+     fi
+   fi
+@@ -136,7 +136,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
+     dnl Look for the libraries
+     AC_CACHE_VAL(ac_cv_path_kde4_lib, [
+       if test x"${with_kde4_lib}" != x ; then
+-        if test -f ${with_kde4_lib}/libkdeui.la; then
++        if test -f ${with_kde4_lib}/libkdeui.dll.a; then
+ 	        ac_cv_path_kde4_lib="-L`(cd ${with_kde4_lib}; pwd)`"
+         else
+ 	        AC_MSG_ERROR([${with_kde4_lib} directory doesn't contain KDE 4.x libraries.])
+@@ -146,7 +146,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
+         AC_MSG_CHECKING([for kdeui library])
+         kde4_topdir=
+         for i in ${kde4_prefix}/lib64 ${kde4_prefix}/lib $libslist ; do
+-          if test -f $i/libkdeui.${shlibext} -o -f $i/libkdeui.la; then
++          if test -f $i/libkdeui.${shlibext} -o -f $i/libkdeui.dll.a; then
+             kde4_topdir=$i
+             AC_MSG_RESULT(${kde4_topdir}/libkdeui)
+ 	          if test ! x"$i" = x"/usr/lib" -a ! x"$i" = x"/usr/lib64"; then
+@@ -162,26 +162,13 @@ AC_DEFUN([GNASH_PATH_KDE4],
+       dnl Look for the kdecore library, which is required
+       if test x"${ac_cv_path_kde4_lib}" != x; then
+         AC_MSG_CHECKING([for kdecore library])
+-        if test -f ${kde4_topdir}/libkdecore.la; then
++        if test -f ${kde4_topdir}/libkdecore.dll.a; then
+           ac_cv_path_kde4_lib="${ac_cv_path_kde4_lib} -lkdecore"
+           AC_MSG_RESULT(${kde4_topdir}/libkdecore)
+         else
+          AC_MSG_RESULT(no)
+         fi
+       fi
+-      dnl Look for the kdeprint library, which is required
+-      AC_MSG_CHECKING([for kdeprint library])
+-      if test x"${libkdeprint}" = x; then
+-        if test -f ${kde4_topdir}/libkdeprint.la -o -f ${kde4_topdir}/libkdeprint.${shlibext}; then
+-          ac_cv_path_kde4_lib="${ac_cv_path_kde4_lib} -lkdeprint"
+-          AC_MSG_RESULT(${kde4_topdir}/libkdeprint)
+-        else
+-          AC_MSG_RESULT(no)
+-        fi
+-      else
+-        AC_MSG_RESULT(${libkdeprint})
+-        ac_cv_path_kde4_lib="${ac_cv_path_kde4_lib} ${libkdeprint}"
+-      fi	
+     ])                  dnl end of cache ac_cv_path_kde4_lib
+   fi                    dnl end of build_kde4
+ 
+--- origsrc/gnash-0.8.6/macros/pthreads.m4	2009-09-13 18:22:18.000000000 -0500
++++ src/gnash-0.8.6/macros/pthreads.m4	2009-11-11 19:11:21.871558000 -0600
+@@ -90,10 +90,10 @@ case "${host_os}" in
+   *linux* | *bsd*)
+     pthread_flags="-pthread"
+     ;;
+-  *darwin*)
++  *darwin* | *cygwin*)
+     pthread_flags="none"
+     ;;
+-  *mingw* | *cygwin*)
++  *mingw*)
+     pthread_flags="-mthreads"
+     ;;
+   *solaris*)
+--- origsrc/gnash-0.8.6/plugin/Makefile.am	2009-09-13 18:22:18.000000000 -0500
++++ src/gnash-0.8.6/plugin/Makefile.am	2009-11-04 12:42:54.149370800 -0600
+@@ -137,11 +137,6 @@ test_perms:
+ 	exit 1; \
+ 	fi
+ 
+-install-pluginLTLIBRARIES: $(plugin_LTLIBRARIES)
+-	@echo "Nothing to install here now."
+-	@echo "Use \"make install-plugin\" to install the Firefox plugin to $(DESTDIR)$(plugindir)."
+-	$(RM) $(DESTDIR)$(plugindir)/*.a $(DESTDIR)$(plugindir)/*.la
+-
+ if !WIN32
+ install-plugin install-plugins: $(plugin_LTLIBRARIES) $(PKGLIB)
+ 	@test -d "$(DESTDIR)$(plugindir)" || $(mkinstalldirs) "$(DESTDIR)$(plugindir)"
+--- origsrc/gnash-0.8.6/plugin/klash4/pluginsinfo	2009-09-13 18:22:18.000000000 -0500
++++ src/gnash-0.8.6/plugin/klash4/pluginsinfo	2009-11-04 13:02:27.091873800 -0600
+@@ -2,6 +2,6 @@ number=1
+ 
+ [0]
+ description=Shockwave Flash 7.0
+-file=libklashpart.so
++file=libklashpart
+ mime=application/x-shockwave-flash:swf:Shockwave Flash;application/futuresplash:spl:FutureSplash Player
+ name=Shockwave Flash
+--- origsrc/gnash-0.8.6/plugin/mozilla-sdk/Makefile.am	2009-09-13 18:22:18.000000000 -0500
++++ src/gnash-0.8.6/plugin/mozilla-sdk/Makefile.am	2009-11-04 02:38:37.717337100 -0600
+@@ -35,8 +35,7 @@ AM_CPPFLAGS += \
+ # AM_CPPFLAGS = -DPLUGIN_TRACE -DXP_UNIX # $(FIREFOX_DEFS)
+ # AM_LDFLAGS  = $(FIREFOX_LIBS)
+ 
+-# noinst_LTLIBRARIES = libmozsdk.la
+-pkglib_LTLIBRARIES = libmozsdk.la
++noinst_LTLIBRARIES = libmozsdk.la
+ 
+ noinst_HEADERS = \
+ 	npplat.h \
