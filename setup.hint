@@ -1,0 +1,9 @@
+category: Video Web
+requires: gstreamer0.10-plugins-base gstreamer0.10-plugins-good gstreamer0.10-plugins-ogg gstreamer0.10-plugins-theora gstreamer0.10-plugins-vorbis libcurl4 libfontconfig1 libfreetype6 libgcc1 libgdk_pixbuf2.0_0 libgif4 libglib2.0_0 libgstinterfaces0.10_0 libgstreamer0.10_0 libgtk2.0_0 libintl8 libjpeg7 libltdl7 libopenssl098 libpng12 libSDL1.2_0 libspeex1 libssh4 libstdc++6 zlib0
+sdesc: "Flash movie player and browser plugin"
+ldesc: "Gnash is a GNU Flash movie player. Flash is an animation file 
+format pioneered by Macromedia which continues to be supported by their 
+successor company, Adobe. Flash has been extended to include audio and 
+video content, and programs written in ActionScript, an 
+ECMAScript-compatible language. Gnash is based on GameSWF, and supports 
+most SWF v7 features and some SWF v8 and v9."

@@ -1,0 +1,56 @@
+--- origsrc/gnash-0.8.7/configure.ac	2010-02-13 18:56:00.000000000 -0600
++++ src/gnash-0.8.7/configure.ac	2010-07-02 19:26:48.028021500 -0500
+@@ -160,10 +160,14 @@ case "${host}" in
+     linux=yes
+     AC_DEFINE([LINUX_HOST], [1], [this is a Linux platform])
+     ;;
+-  *-cygwin* | *-mingw* | *-pw32*)
++  *-mingw* | *-pw32*)
+     windows=yes
+     AC_DEFINE([WIN32_HOST], [1], [this is a Win32 platform])
+     ;;
++  *-cygwin*)
++    cygwin=yes
++    AC_DEFINE([CYGWIN_HOST], [1], [this is a Cygwin platform])
++    ;;
+   *64-*-*bsd*)
+     bsd_os=bsd 
+     AC_DEFINE([WORDSIZE], [64], [this is a 64 platform])
+@@ -2123,7 +2127,7 @@ GNASH_PATH_CURL
+ 
+ dnl Define winsock if we're on windows. We could do something complicated,
+ dnl but since AC_EXEEXT does it for us, we'll do this the easy way.
+-if test x"$EXEEXT" = "exe"; then
++if test x"$windows" = "xyes"; then
+   AC_DEFINE(HAVE_WINSOCK,1,[This is defined is we are on Win32])
+ fi
+ 
+--- origsrc/gnash-0.8.7/libbase/extension.cpp	2010-02-10 17:20:22.000000000 -0600
++++ src/gnash-0.8.7/libbase/extension.cpp	2010-07-02 19:26:48.041022300 -0500
+@@ -247,7 +247,11 @@ Extension::scanDir(const std::string& di
+             const std::string suffix = name.substr(pos);
+             name.erase(pos);
+ 
++#ifdef __CYGWIN__
++            if (suffix == ".dll") {
++#else
+             if (suffix == ".so") {
++#endif
+                 log_debug(_("Gnash Plugin name: %s"), name);
+                 _modules.push_back(name);
+             }
+--- origsrc/gnash-0.8.7/macros/pthreads.m4	2010-02-10 17:20:17.000000000 -0600
++++ src/gnash-0.8.7/macros/pthreads.m4	2010-07-02 19:26:48.070023900 -0500
+@@ -90,10 +90,10 @@ case "${host_os}" in
+   *linux* | *bsd*)
+     pthread_flags="-pthread"
+     ;;
+-  *darwin*)
++  *darwin* | *cygwin*)
+     pthread_flags="none"
+     ;;
+-  *mingw* | *cygwin*)
++  *mingw*)
+     pthread_flags="-mthreads"
+     ;;
+   *solaris*)

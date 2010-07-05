@@ -1,0 +1,62 @@
+DESCRIPTION="GNU Flash player"
+HOMEPAGE="http://www.gnu.org/software/gnash/"
+SRC_URI="mirror://gnu/${PN}/${PV}/${P}.tar.bz2"
+
+PATCH_URI="
+	0.8.7-configure.patch
+	0.8.7-cygwin.patch
+	0.8.7-jemalloc.patch
+	0.8.7-kde4.patch
+	0.8.7-no-undefined.patch
+"
+
+# without working shared libraries, a -devel package isn't very useful
+PKG_NAMES="${PN}" # ${PN}-devel
+gnash_CONTENTS="etc/ usr/bin/ usr/lib/mozilla/ usr/share/"
+PKG_IGNORE="usr/include/ usr/lib/gnash/ usr/lib/pkgconfig/"
+
+DIFF_EXCLUDES="libltdl ltdl.m4"
+
+src_compile() {
+	cd ${S}
+	ACLOCAL_FLAGS="-I cygnal"
+	cygautoreconf
+
+	cd ${B}
+	cygconf \
+		--enable-gui=gtk \
+		--enable-media=gst \
+		--enable-renderer=agg \
+		--enable-sound=sdl \
+		--enable-ghelp \
+		--enable-ssh \
+		--enable-ssl \
+		--disable-jemalloc \
+		--with-npapi-plugindir=/usr/lib/mozilla/plugins \
+		--with-plugins-install=system \
+		--without-included-ltdl \
+		ac_cv_header_winsock_h=no \
+		ac_cv_header_winsock2_h=no
+#		--with-kde4-prefix=/usr \
+#		--with-kde4-incl=/usr/include/kde4 \
+#		--with-kde4-lib=/usr/lib/kde4/lib \
+
+	cygmake \
+		AGG_LIBS="/usr/lib/libagg.a" \
+		BOOST_LIBS='/usr/lib/libboost_date_time-mt.a /usr/lib/libboost_thread-mt.a' \
+#		KDE4_LIBS='-L/usr/lib/kde4/lib -lkparts -lkdeui -lkdecore' \
+#		LDFLAGS='-no-undefined'
+}
+
+src_install() {
+	cd ${B}
+	cyginstall
+
+	make_desktop_entry gtk-gnash "Gnash" /usr/share/gnash/GnashG.png "AudioVideo;Video;Player" "SWF Player" "NoDisplay=true" "MimeType=application/x-shockwave-flash;video/x-flv;"
+
+	make_etc_defaults /etc/gnashrc /etc/gnashpluginrc
+
+#	cygmake -C plugin/klash4 install-plugins DESTDIR=${D}
+#	rm -f ${D}/usr/lib/kde4/*.la
+#	mv ${D}/usr/lib/kde4/{cyg,lib}klashpart.dll
+}

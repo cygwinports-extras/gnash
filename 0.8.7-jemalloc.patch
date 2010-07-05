@@ -1,0 +1,48 @@
+--- origsrc/gnash-0.8.7/libbase/jemalloc.c	2010-02-10 17:20:22.000000000 -0600
++++ src/gnash-0.8.7/libbase/jemalloc.c	2010-07-02 19:26:48.048022700 -0500
+@@ -238,13 +238,12 @@ typedef unsigned long long uintmax_t;
+ #  define __DECONST(type, var)	((type)(uintptr_t)(const void *)(var))
+ # endif
+ # include <sys/mman.h>
+-# ifndef MADV_FREE
+-#  define MADV_FREE	MADV_DONTNEED
+-# endif
+ # include <sys/param.h>
+ # include <sys/time.h>
+ # include <sys/types.h>
++#ifndef CYGWIN_HOST
+ # include <sys/sysctl.h>
++#endif
+ # include "jemtree.h"
+ # include <sys/uio.h>
+ 
+@@ -253,7 +252,7 @@ typedef unsigned long long uintmax_t;
+ # ifndef SIZE_T_MAX
+ #  define SIZE_T_MAX	SIZE_MAX
+ # endif
+-# if defined(DARWIN) || defined(LINUX_HOST)
++# if defined(DARWIN) || defined(LINUX_HOST) || defined(CYGWIN_HOST)
+ #  define _pthread_self pthread_self
+ #  define _pthread_mutex_init pthread_mutex_init
+ #  define _pthread_mutex_trylock pthread_mutex_trylock
+@@ -2380,7 +2379,7 @@ chunk_dealloc_dss(void *chunk, size_t si
+ 			mmap(chunk, size, PROT_READ | PROT_WRITE, MAP_PRIVATE
+ 			    | MAP_ANON | MAP_FIXED, -1, 0);
+ #else
+-			madvise(chunk, size, MADV_FREE);
++			posix_madvise(chunk, size, POSIX_MADV_DONTNEED);
+ #endif
+ 		}
+ 
+@@ -3102,9 +3101,9 @@ arena_purge(arena_t *arena)
+ 					arena->stats.decommitted += npages;
+ #  endif
+ #else
+-					madvise((void *)((uintptr_t)chunk + (i
++					posix_madvise((void *)((uintptr_t)chunk + (i
+ 					    << pagesize_2pow)), pagesize *
+-					    npages, MADV_FREE);
++					    npages, POSIX_MADV_DONTNEED);
+ #endif
+ #ifdef MALLOC_STATS
+ 					arena->stats.nmadvise++;

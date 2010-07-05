@@ -1,0 +1,151 @@
+--- origsrc/gnash-0.8.7/backend/Makefile.am	2010-02-10 17:20:18.000000000 -0600
++++ src/gnash-0.8.7/backend/Makefile.am	2010-07-05 02:24:07.864154300 -0500
+@@ -81,11 +81,11 @@ endif
+ 
+ if  BUILD_AGG_RENDERER
+ if HAVE_AGG
+-#noinst_LTLIBRARIES += libgnashagg.la
+-pkglib_LTLIBRARIES += libgnashagg.la
++noinst_LTLIBRARIES += libgnashagg.la
++#pkglib_LTLIBRARIES += libgnashagg.la
+ libgnashagg_la_SOURCES = Renderer_agg.cpp 
+ #libgnashagg_la_LDFLAGS = -module -avoid-version -no-undefined
+-libgnashagg_la_LIBADD = $(AGG_LIBS)
++libgnashagg_la_LIBADD = ../libcore/libgnashcore.la $(AGG_LIBS)
+ endif
+ endif
+ 
+@@ -95,7 +95,7 @@ noinst_LTLIBRARIES += libgnashcairo.la
+ # plugins_LTLIBRARIES += libgnashcairo.la
+ libgnashcairo_la_SOURCES = Renderer_cairo.cpp PathParser.cpp
+ #libgnashcairo_la_LDFLAGS = -module -avoid-version -no-undefined
+-libgnashcairo_la_LIBADD = $(CAIRO_LIBS)
++libgnashcairo_la_LIBADD = ../libcore/libgnashcore.la $(CAIRO_LIBS)
+ endif
+ endif
+ 
+--- origsrc/gnash-0.8.7/gui/Makefile.am	2010-02-10 17:20:22.000000000 -0600
++++ src/gnash-0.8.7/gui/Makefile.am	2010-07-04 23:25:08.429893800 -0500
+@@ -115,7 +115,7 @@ GNASH_LIBS = \
+ 	$(top_builddir)/libbase/libgnashbase.la
+ 
+ if LIBLTDL2
+-GNASH_LIBS += $(top_builddir)/libltdl/libltdlc.la
++GNASH_LIBS += $(LIBLTDL)
+ endif
+ if LIBLTDL1
+ GNASH_LIBS += $(top_builddir)/libbase/libltdlc.la
+--- origsrc/gnash-0.8.7/gui/am-frag/gtk.am	2010-02-10 17:20:17.000000000 -0600
++++ src/gnash-0.8.7/gui/am-frag/gtk.am	2010-07-04 23:24:58.245311300 -0500
+@@ -37,14 +37,14 @@ gtk_gnash_CPPFLAGS += $(OPENGL_CFLAGS)
+ gtk_gnash_SOURCES += gtk_glue_gtkglext.cpp gtk_glue_gtkglext.h \
+ 		gtk.cpp gtksup.h gtk_glue.h $(GTK_CANVAS)
+ gtk_gnash_LDADD = $(top_builddir)/backend/libgnashogl.la \
+-		$(GNASH_LIBS) $(GTK_LIBS) $(OPENGL_LIBS)
++		$(GNASH_LIBS) $(AM_LDFLAGS) $(GTK_LIBS) $(OPENGL_LIBS)
+ endif				# BUILD_OGL_RENDERER
+ if BUILD_AGG_RENDERER
+ gtk_gnash_CPPFLAGS += $(AGG_CFLAGS)
+ gtk_gnash_SOURCES += gtk_glue_agg.cpp gtk_glue_agg.h \
+ 		gtk.cpp gtksup.h gtk_glue.h $(GTK_CANVAS)
+ gtk_gnash_LDADD = $(top_builddir)/backend/libgnashagg.la \
+-		$(GNASH_LIBS) $(GTK_LIBS) $(AGG_LIBS) $(CAIRO_LIBS)
++		$(GNASH_LIBS) $(AM_LDFLAGS) $(GTK_LIBS) $(AGG_LIBS) $(CAIRO_LIBS)
+ if HAVE_XV
+ gtk_gnash_SOURCES += gtk_glue_agg_xv.cpp gtk_glue_agg_xv.h
+ gtk_gnash_LDADD += $(X11_LIBS)
+@@ -55,6 +55,6 @@ gtk_gnash_CPPFLAGS += $(CAIRO_CFLAGS)
+ gtk_gnash_SOURCES += gtk_glue_cairo.cpp gtk_glue_cairo.h \
+ 		gtk.cpp gtksup.h gtk_glue.h $(GTK_CANVAS)
+ gtk_gnash_LDADD = $(top_builddir)/backend/libgnashcairo.la \
+-		$(GNASH_LIBS) $(GTK_LIBS) $(CAIRO_LIBS)
++		$(GNASH_LIBS) $(AM_LDFLAGS) $(GTK_LIBS) $(CAIRO_LIBS)
+ endif				# BUILD_CAIRO_RENDERER
+ endif				# BUILD_GTK_GUI
+--- origsrc/gnash-0.8.7/libbase/Makefile.am	2010-02-10 17:20:23.000000000 -0600
++++ src/gnash-0.8.7/libbase/Makefile.am	2010-07-02 19:26:48.037022000 -0500
+@@ -50,7 +50,7 @@ libgnashbase_la_LIBADD = \
+ 	$(Z_LIBS) \
+ 	$(CURL_LIBS) \
+ 	$(OPENGL_LIBS) \
+-	$(LIBINTL) \
++	$(LTLIBINTL) \
+ 	$(BOOST_LIBS) \
+ 	$(PTHREAD_LIBS) \
+ 	$(NULL)
+@@ -195,7 +195,7 @@ libgnashbase_la_LDFLAGS = -release $(VER
+ libgnashbase_la_DEPENDENCIES = $(LIBLTDLLIB)
+ 
+ if LIBLTDL2
+-libgnashbase_la_LIBADD += $(top_builddir)/libltdl/libltdlc.la
++libgnashbase_la_LIBADD += $(LIBLTDL)
+ endif
+ if LIBLTDL1
+ libgnashbase_la_LIBADD += $(top_builddir)/libbase/libltdlc.la
+--- origsrc/gnash-0.8.7/libmedia/Makefile.am	2010-02-13 18:56:00.000000000 -0600
++++ src/gnash-0.8.7/libmedia/Makefile.am	2010-07-02 19:26:48.052022900 -0500
+@@ -47,6 +47,7 @@ libgnashmedia_la_CPPFLAGS = \
+ # include_HEADERS = log.h err.h proc.h serial.h xantrex.h outback.h
+ 
+ libgnashmedia_la_LIBADD = \
++	../libbase/libgnashbase.la \
+ 	$(PNG_LIBS) \
+ 	$(JPEG_LIBS) \
+ 	$(GIF_LIBS) \
+--- origsrc/gnash-0.8.7/libsound/Makefile.am	2010-02-10 17:20:17.000000000 -0600
++++ src/gnash-0.8.7/libsound/Makefile.am	2010-07-02 19:26:48.056023100 -0500
+@@ -30,6 +30,8 @@ libgnashsound_la_CPPFLAGS = \
+ 	$(NULL)
+ 
+ libgnashsound_la_LIBADD = \
++	../libmedia/libgnashmedia.la \
++	../libbase/libgnashbase.la \
+ 	$(BOOST_LIBS) \
+ 	$(PTHREAD_LIBS) \
+ 	$(SDL_LIBS) \
+--- origsrc/gnash-0.8.7/plugin/Makefile.am	2010-02-10 17:20:22.000000000 -0600
++++ src/gnash-0.8.7/plugin/Makefile.am	2010-07-04 23:32:23.092755100 -0500
+@@ -119,7 +119,7 @@ libgnashplugin_la_LIBADD   = \
+ if PLUGIN_LINK_UNDEFINED
+ libgnashplugin_la_LDFLAGS = -avoid-version -L$(plugindir)
+ else
+-libgnashplugin_la_LDFLAGS = -module -avoid-version -L$(plugindir)
++libgnashplugin_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir)
+ endif
+ endif # NPAPI
+ endif # WIN32
+@@ -137,11 +137,6 @@ test_perms:
+ 	exit 1; \
+ 	fi
+ 
+-install-pluginLTLIBRARIES: $(plugin_LTLIBRARIES)
+-	@echo "Nothing to install here now."
+-	@echo "Use \"make install-plugin\" to install the Firefox plugin to $(DESTDIR)$(plugindir)."
+-	$(RM) $(DESTDIR)$(plugindir)/*.a $(DESTDIR)$(plugindir)/*.la
+-
+ if !WIN32
+ install-plugin install-plugins: $(plugin_LTLIBRARIES) $(PKGLIB)
+ 	@test -d "$(DESTDIR)$(plugindir)" || $(mkinstalldirs) "$(DESTDIR)$(plugindir)"
+--- origsrc/gnash-0.8.7/plugin/klash4/Makefile.am	2010-02-10 17:20:18.000000000 -0600
++++ src/gnash-0.8.7/plugin/klash4/Makefile.am	2010-07-04 23:29:11.965823300 -0500
+@@ -40,7 +40,7 @@ libklashpart_la_DEPENDENCIES = klash_par
+ if PLUGIN_LINK_UNDEFINED
+ libklashpart_la_LDFLAGS = -avoid-version -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
+ else
+-libklashpart_la_LDFLAGS = -module -avoid-version -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
++libklashpart_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
+ endif
+ 
+ dist_kde_services_DATA = klash_part.desktop
+--- origsrc/gnash-0.8.7/plugin/mozilla-sdk/Makefile.am	2010-02-10 17:20:23.000000000 -0600
++++ src/gnash-0.8.7/plugin/mozilla-sdk/Makefile.am	2010-07-02 19:26:48.083024700 -0500
+@@ -35,8 +35,7 @@ AM_CPPFLAGS += \
+ # AM_CPPFLAGS = -DPLUGIN_TRACE -DXP_UNIX # $(FIREFOX_DEFS)
+ # AM_LDFLAGS  = $(FIREFOX_LIBS)
+ 
+-# noinst_LTLIBRARIES = libmozsdk.la
+-pkglib_LTLIBRARIES = libmozsdk.la
++noinst_LTLIBRARIES = libmozsdk.la
+ 
+ noinst_HEADERS = \
+ 	npplat.h \
