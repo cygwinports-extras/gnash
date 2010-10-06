@@ -1,19 +1,10 @@
---- origsrc/gnash-0.8.7/macros/kde4.m4	2010-02-10 17:20:22.000000000 -0600
-+++ src/gnash-0.8.7/macros/kde4.m4	2010-07-02 19:26:48.061023400 -0500
-@@ -24,7 +24,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
-              with_kde4_incl=${withval})
-   dnl make sure the path is a useable one
-   if test x"${with_kde4_incl}" != x ; then
--    if test ! -f ${with_kde4_incl}/kapp.h ; then
-+    if test ! -f ${with_kde4_incl}/kapplication.h ; then
-       AC_MSG_ERROR([${with_kde4_incl} directory doesn't contain any KDE 4.x headers])
-     fi
-   fi
+--- origsrc/gnash-0.8.8/macros/kde4.m4	2010-08-07 10:50:00.000000000 -0500
++++ src/gnash-0.8.8/macros/kde4.m4	2010-10-04 21:10:31.233607600 -0500
 @@ -38,7 +38,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
               with_kde4_lib=${withval})
    dnl make sure the path is a useable one
    if test x"${with_kde4_lib}" != x ; then 
--    if test ! -f ${with_kde4_lib}/libkdeui.la; then
+-    if test ! -f ${with_kde4_lib}/libkdeui.so; then
 +    if test ! -f ${with_kde4_lib}/libkdeui.dll.a; then
        AC_MSG_ERROR([${with_kde4_lib} directory doesn't contain any KDE 4.x libraries!])
      fi
@@ -30,13 +21,13 @@
 @@ -146,7 +146,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
          AC_MSG_CHECKING([for kdeui library])
          kde4_topdir=
-         for i in ${kde4_prefix}/lib64 ${kde4_prefix}/lib $libslist ; do
+         for i in ${kde4_prefix}/lib64 ${kde4_prefix}/lib $libslist /usr/lib/kde4/devel; do
 -          if test -f $i/libkdeui.${shlibext} -o -f $i/libkdeui.la; then
 +          if test -f $i/libkdeui.${shlibext} -o -f $i/libkdeui.dll.a; then
              kde4_topdir=$i
              AC_MSG_RESULT(${kde4_topdir}/libkdeui)
  	          if test ! x"$i" = x"/usr/lib" -a ! x"$i" = x"/usr/lib64"; then
-@@ -162,26 +162,13 @@ AC_DEFUN([GNASH_PATH_KDE4],
+@@ -162,7 +162,7 @@ AC_DEFUN([GNASH_PATH_KDE4],
        dnl Look for the kdecore library, which is required
        if test x"${ac_cv_path_kde4_lib}" != x; then
          AC_MSG_CHECKING([for kdecore library])
@@ -45,31 +36,12 @@
            ac_cv_path_kde4_lib="${ac_cv_path_kde4_lib} -lkdecore"
            AC_MSG_RESULT(${kde4_topdir}/libkdecore)
          else
-          AC_MSG_RESULT(no)
-         fi
-       fi
--      dnl Look for the kdeprint library, which is required
--      AC_MSG_CHECKING([for kdeprint library])
--      if test x"${libkdeprint}" = x; then
--        if test -f ${kde4_topdir}/libkdeprint.la -o -f ${kde4_topdir}/libkdeprint.${shlibext}; then
--          ac_cv_path_kde4_lib="${ac_cv_path_kde4_lib} -lkdeprint"
--          AC_MSG_RESULT(${kde4_topdir}/libkdeprint)
--        else
--          AC_MSG_RESULT(no)
--        fi
--      else
--        AC_MSG_RESULT(${libkdeprint})
--        ac_cv_path_kde4_lib="${ac_cv_path_kde4_lib} ${libkdeprint}"
--      fi	
-     ])                  dnl end of cache ac_cv_path_kde4_lib
-   fi                    dnl end of build_kde4
- 
---- origsrc/gnash-0.8.7/plugin/klash4/pluginsinfo	2010-02-10 17:20:17.000000000 -0600
-+++ src/gnash-0.8.7/plugin/klash4/pluginsinfo	2010-07-02 19:26:48.079024400 -0500
+--- origsrc/gnash-0.8.8/plugin/klash4/pluginsinfo	2010-08-07 10:50:01.000000000 -0500
++++ src/gnash-0.8.8/plugin/klash4/pluginsinfo	2010-09-28 01:19:57.924647900 -0500
 @@ -2,6 +2,6 @@ number=1
  
  [0]
- description=Shockwave Flash 7.0
+ description=Shockwave Flash 10.1 r999
 -file=libklashpart.so
 +file=libklashpart
  mime=application/x-shockwave-flash:swf:Shockwave Flash;application/futuresplash:spl:FutureSplash Player

@@ -1,0 +1,61 @@
+Other libraries cannot be linked shared due to weak symbol usage:
+
+http://lists.gnu.org/archive/html/gnash-dev/2010-07/msg00051.html
+
+--- origsrc/gnash-0.8.8/libbase/Makefile.am	2010-08-07 10:50:00.000000000 -0500
++++ src/gnash-0.8.8/libbase/Makefile.am	2010-09-28 01:31:22.028404600 -0500
+@@ -55,7 +55,7 @@ libgnashbase_la_LIBADD = \
+ 	$(Z_LIBS) \
+ 	$(CURL_LIBS) \
+ 	$(OPENGL_LIBS) \
+-	$(LIBINTL) \
++	$(LTLIBINTL) \
+ 	$(BOOST_LIBS) \
+ 	$(PTHREAD_LIBS) \
+ 	$(NULL)
+--- origsrc/gnash-0.8.8/librender/Makefile.am	2010-08-16 23:09:23.000000000 -0500
++++ src/gnash-0.8.8/librender/Makefile.am	2010-09-28 15:53:48.030726100 -0500
+@@ -66,7 +66,7 @@ noinst_HEADERS = \
+         PathParser.h
+ 
+ pkglib_LTLIBRARIES = libgnashrender.la
+-libgnashrender_la_LIBADD = $(LIBVA_LIBS) $(LIBVA_X11_LIBS) $(LIBVA_GLX_LIBS)
++libgnashrender_la_LIBADD = $(LIBVA_LIBS) $(LIBVA_X11_LIBS) $(LIBVA_GLX_LIBS) $(GNASH_LIBS)
+ libgnashrender_la_SOURCES = PathParser.cpp
+ 
+ if BUILD_OGL_RENDERER
+--- origsrc/gnash-0.8.8/plugin/klash4/Makefile.am	2010-08-07 10:50:01.000000000 -0500
++++ src/gnash-0.8.8/plugin/klash4/Makefile.am	2010-09-28 01:33:00.166193700 -0500
+@@ -40,7 +40,7 @@ libklashpart_la_DEPENDENCIES = klash_par
+ if PLUGIN_LINK_UNDEFINED
+ libklashpart_la_LDFLAGS = -avoid-version -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
+ else
+-libklashpart_la_LDFLAGS = -module -avoid-version -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
++libklashpart_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
+ endif
+ 
+ dist_kde_services_DATA = klash_part.desktop
+--- origsrc/gnash-0.8.8/plugin/npapi/Makefile.am	2010-08-08 20:54:32.000000000 -0500
++++ src/gnash-0.8.8/plugin/npapi/Makefile.am	2010-10-04 23:18:48.160017900 -0500
+@@ -94,7 +94,7 @@ check:
+ if PLUGIN_LINK_UNDEFINED
+ libgnashplugin_la_LDFLAGS = -avoid-version -L$(plugindir)
+ else
+-libgnashplugin_la_LDFLAGS = -module -avoid-version -L$(plugindir)
++libgnashplugin_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir)
+ endif
+ 
+ if VISIBILITY_WORKS
+@@ -120,11 +120,7 @@ if !WIN32
+ install-plugin install-plugins: $(plugin_LTLIBRARIES) $(PKGLIB)
+ 	@test -d "$(DESTDIR)$(plugindir)" || $(mkinstalldirs) "$(DESTDIR)$(plugindir)"
+ 	@echo "Installing plugin to $(DESTDIR)$(plugindir)"
+-	@if test -d .libs; then \
+-	  cp -f .libs/libgnashplugin.so* $(DESTDIR)$(plugindir)/libgnashplugin.so; \
+-	else \
+-	  cp -f libgnashplugin.so* $(DESTDIR)$(plugindir)/libgnashplugin.so; \
+-	fi
++	$(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $(plugin_LTLIBRARIES) $(DESTDIR)$(plugindir)
+ else
+ install-plugin install-plugins: 
+ 	: # do nothing

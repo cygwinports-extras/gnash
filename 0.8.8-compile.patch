@@ -1,0 +1,20 @@
+--- origsrc/gnash-0.8.8/libbase/tu_file.h	2010-08-07 10:50:00.000000000 -0500
++++ src/gnash-0.8.8/libbase/tu_file.h	2010-09-28 15:09:11.983692600 -0500
+@@ -9,6 +9,7 @@
+ #ifndef TU_FILE_H
+ #define TU_FILE_H
+ 
++#include <cstdio>
+ #include "dsodefs.h" // DSOEXPORT
+ #include "utility.h"
+ #include "IOChannel.h" // for inheritance
+--- origsrc/gnash-0.8.8/libcore/ExternalInterface.cpp	2010-08-07 10:50:00.000000000 -0500
++++ src/gnash-0.8.8/libcore/ExternalInterface.cpp	2010-09-28 15:23:14.128170100 -0500
+@@ -21,6 +21,7 @@
+ #include <map>
+ #include <vector>
+ #include <sstream>
++#include <sys/socket.h>
+ #include <sys/ioctl.h>
+ #include <sys/types.h>
+ #include <boost/algorithm/string/erase.hpp>
