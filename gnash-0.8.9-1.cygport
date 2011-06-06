@@ -6,18 +6,19 @@ PATCH_URI="
 	0.8.7-configure.patch
 	0.8.7-cygwin.patch
 	0.8.7-jemalloc.patch
-	0.8.8-compile.patch
-	0.8.8-kde4.patch
-	0.8.8-no-undefined.patch
-	0.8.8-system-libltdl.patch
+	0.8.9-kde4.patch
+	0.8.9-no-undefined.patch
 "
 
 # without working shared libraries, a -devel package isn't very useful
 PKG_NAMES="${PN} kde4-gnash" # ${PN}-devel
 PKG_HINTS="setup kde4"
-gnash_CONTENTS="--exclude=kde4* etc/ usr/bin/ usr/lib/mozilla/ usr/share/"
-kde4_gnash_CONTENTS="usr/bin/kde4-gnash.exe usr/lib/kde4/ usr/share/kde4/ usr/share/man/man1/kde4*"
-PKG_IGNORE="usr/include/ usr/lib/gnash/ usr/lib/pkgconfig/"
+gnash_CONTENTS="--exclude=gnash-qt-* --exclude=kde4* --exclude=klash*
+                etc/ usr/bin/ usr/lib/mozilla/ usr/share/"
+kde4_gnash_CONTENTS="usr/bin/gnash-qt-launcher usr/bin/kde4-gnash.exe usr/lib/kde4/
+                     usr/share/applications/klash.desktop usr/share/icons/*/*/*/klash.*
+                     usr/share/kde4/ usr/share/man/man1/gnash-qt-* usr/share/man/man1/kde4*"
+PKG_IGNORE="usr/include/ usr/lib/gnash/lib* usr/lib/pkgconfig/"
 
 DIFF_EXCLUDES="libltdl ltdl.m4"
 
@@ -27,9 +28,11 @@ src_compile() {
 
 	cd ${B}
 	cygconf \
+		--enable-extensions=dbus,fileio,gtk,mysql \
 		--enable-gui=gtk,kde4,sdl \
 		--enable-hwaccel=none \
 		--enable-media=gst \
+		--enable-renderer=agg,cairo,ogl \
 		--enable-sound=sdl \
 		--disable-cygnal \
 		--enable-ghelp \
@@ -38,23 +41,21 @@ src_compile() {
 		--disable-jemalloc \
 		--with-kde4-prefix=/usr \
 		--with-kde4-incl=/usr/include/kde4 \
-		--with-kde4-lib=/usr/lib/kde4/lib \
+		--with-kde4-lib=/usr/lib \
 		--with-npapi-plugindir=/usr/lib/mozilla/plugins \
 		--with-plugins-install=system \
-		--without-included-ltdl \
 		ac_cv_header_winsock_h=no \
 		ac_cv_header_winsock2_h=no
 
-	cygmake \
-		BOOST_LIBS='-lboost_date_time-mt -lboost_thread-mt' \
-		KDE4_LIBS='-L/usr/lib/kde4/lib -lkparts -lkdeui -lkdecore'
+	cygmake KDE4_LIBS='-lkparts -lkdeui -lkdecore'
 }
 
 src_install() {
 	cd ${B}
 	cyginstall install-plugins
 
-	make_desktop_entry gtk-gnash "Gnash" /usr/share/gnash/GnashG.png "AudioVideo;Video;Player" "SWF Player" "NoDisplay=true" "MimeType=application/x-shockwave-flash;video/x-flv;"
+	# .la files are removed by install-exec-local, so no auto-fixups
+	mv ${D}/usr/lib/bin/* ${D}/usr/bin/
 
 	make_etc_defaults /etc/gnashrc /etc/gnashpluginrc
 
