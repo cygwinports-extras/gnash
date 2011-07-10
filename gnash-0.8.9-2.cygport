@@ -28,7 +28,6 @@ src_compile() {
 
 	cd ${B}
 	cygconf \
-		--enable-extensions=dbus,fileio,gtk,mysql \
 		--enable-gui=gtk,kde4,sdl \
 		--enable-hwaccel=none \
 		--enable-media=gst \
@@ -46,8 +45,9 @@ src_compile() {
 		--with-plugins-install=system \
 		ac_cv_header_winsock_h=no \
 		ac_cv_header_winsock2_h=no
+#		--enable-extensions=dbus,fileio,gtk,mysql \
 
-	cygmake KDE4_LIBS='-lkparts -lkdeui -lkdecore'
+	cygmake KDE4_LIBS='-lkparts -lkdeui -lkdecore' # LDFLAGS="-no-undefined"
 }
 
 src_install() {
@@ -55,10 +55,11 @@ src_install() {
 	cyginstall install-plugins
 
 	# .la files are removed by install-exec-local, so no auto-fixups
-	mv ${D}/usr/lib/bin/* ${D}/usr/bin/
+#	mv ${D}/usr/lib/bin/* ${D}/usr/bin/
 
 	make_etc_defaults /etc/gnashrc /etc/gnashpluginrc
 
 	rm -f ${D}/usr/lib/kde4/*.{a,la}
+	# KDE4 plugins must use "lib" prefix if prefixed at all
 	mv ${D}/usr/lib/kde4/{cyg,lib}klashpart.dll
 }
