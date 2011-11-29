@@ -3,11 +3,22 @@ HOMEPAGE="http://www.gnu.org/software/gnash/"
 SRC_URI="mirror://gnu/${PN}/${PV}/${P}.tar.bz2"
 
 PATCH_URI="
+	mirror://portage/www-plugins/${PN}/files/${P}-ffmpeg-detection.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-libavcodec-version.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-look-harder-for-version_h.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-audio-resample.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-decode-audio.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-decode-video.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-parser.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avformat-metadata.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-cygnal-sshclient.patch
+	mirror://portage/www-plugins/${PN}/files/${P}-cve-2011-4328.patch
 	0.8.7-configure.patch
 	0.8.7-cygwin.patch
 	0.8.7-jemalloc.patch
 	0.8.9-kde4.patch
 	0.8.9-no-undefined.patch
+	0.8.9-gettext018.patch
 "
 
 # without working shared libraries, a -devel package isn't very useful
@@ -33,7 +44,7 @@ src_compile() {
 		--enable-media=gst \
 		--enable-renderer=agg,cairo,ogl \
 		--enable-sound=sdl \
-		--disable-cygnal \
+		--enable-cygnal \
 		--enable-ghelp \
 		--enable-ssh \
 		--enable-ssl \

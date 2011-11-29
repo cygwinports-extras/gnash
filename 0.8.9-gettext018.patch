@@ -1,0 +1,44 @@
+--- origsrc/gnash-0.8.9/gui/gnash.cpp	2011-02-26 12:11:07.000000000 -0600
++++ src/gnash-0.8.9/gui/gnash.cpp	2011-11-29 01:12:23.128228400 -0600
+@@ -88,7 +88,7 @@ main(int argc, char *argv[])
+ 
+     // Enable native language support, i.e. internationalization
+ #ifdef ENABLE_NLS
+-    std::setlocale (LC_ALL, "");
++    setlocale (LC_ALL, "");
+     bindtextdomain (PACKAGE, LOCALEDIR);
+     textdomain (PACKAGE);
+ #endif
+--- origsrc/gnash-0.8.9/utilities/flvdumper.cpp	2011-02-26 12:11:08.000000000 -0600
++++ src/gnash-0.8.9/utilities/flvdumper.cpp	2011-11-29 01:06:41.543690900 -0600
+@@ -123,7 +123,7 @@ main(int argc, char *argv[])
+     
+     // Enable native language support, i.e. internationalization
+ #ifdef ENABLE_NLS
+-    std::setlocale (LC_ALL, "");
++    setlocale (LC_ALL, "");
+     bindtextdomain (PACKAGE, LOCALEDIR);
+     textdomain (PACKAGE);
+ #endif
+--- origsrc/gnash-0.8.9/utilities/processor.cpp	2011-03-13 11:47:36.000000000 -0500
++++ src/gnash-0.8.9/utilities/processor.cpp	2011-11-29 01:06:59.714730200 -0600
+@@ -222,7 +222,7 @@ main(int argc, char *argv[])
+ 
+     // Enable native language support, i.e. internationalization
+ #ifdef ENABLE_NLS
+-    std::setlocale (LC_ALL, "");
++    setlocale (LC_ALL, "");
+     bindtextdomain (PACKAGE, LOCALEDIR);
+     textdomain (PACKAGE);
+ #endif
+--- origsrc/gnash-0.8.9/utilities/soldumper.cpp	2011-02-26 12:11:08.000000000 -0600
++++ src/gnash-0.8.9/utilities/soldumper.cpp	2011-11-29 01:07:04.562007500 -0600
+@@ -91,7 +91,7 @@ main(int argc, char *argv[])
+     
+     // Enable native language support, i.e. internationalization
+ #ifdef ENABLE_NLS
+-    std::setlocale (LC_ALL, "");
++    setlocale (LC_ALL, "");
+     bindtextdomain (PACKAGE, LOCALEDIR);
+     textdomain (PACKAGE);
+ #endif
