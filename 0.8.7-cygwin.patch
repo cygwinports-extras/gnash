@@ -25,20 +25,6 @@
    AC_DEFINE(HAVE_WINSOCK,1,[This is defined is we are on Win32])
  fi
  
---- origsrc/gnash-0.8.7/libbase/extension.cpp	2010-02-10 17:20:22.000000000 -0600
-+++ src/gnash-0.8.7/libbase/extension.cpp	2010-07-02 19:26:48.041022300 -0500
-@@ -247,7 +247,11 @@ Extension::scanDir(const std::string& di
-             const std::string suffix = name.substr(pos);
-             name.erase(pos);
- 
-+#ifdef __CYGWIN__
-+            if (suffix == ".dll") {
-+#else
-             if (suffix == ".so") {
-+#endif
-                 log_debug(_("Gnash Plugin name: %s"), name);
-                 _modules.push_back(name);
-             }
 --- origsrc/gnash-0.8.7/macros/pthreads.m4	2010-02-10 17:20:17.000000000 -0600
 +++ src/gnash-0.8.7/macros/pthreads.m4	2010-07-02 19:26:48.070023900 -0500
 @@ -90,10 +90,10 @@ case "${host_os}" in

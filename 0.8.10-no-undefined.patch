@@ -1,0 +1,67 @@
+--- origsrc/gnash-0.8.10/cygnal/libnet/sslserver.cpp	2012-01-20 18:21:00.000000000 -0600
++++ src/gnash-0.8.10/cygnal/libnet/sslserver.cpp	2012-03-18 00:20:48.191229200 -0500
+@@ -133,7 +133,7 @@ SSLServer::loadDhParams(SSL_CTX *ctx, ch
+ 
+     if (dh && ctx) {
+ 	if (SSL_CTX_set_tmp_dh(ctx, dh) < 0) {
+-	    log_error(_("SSL!!", "Couldn't set DH parameters: %s "),
++	    log_error("SSL!!", "Couldn't set DH parameters: %s ",
+ 		      ERR_reason_error_string(ERR_get_error()));
+ 	    return false;
+ 	}
+--- origsrc/gnash-0.8.10/libbase/Makefile.am	2012-01-19 13:17:48.000000000 -0600
++++ src/gnash-0.8.10/libbase/Makefile.am	2012-03-17 22:05:55.469971400 -0500
+@@ -176,7 +176,7 @@ libgnashbase_la_LIBADD = \
+ 	$(GIF_LIBS) \
+ 	$(Z_LIBS) \
+ 	$(CURL_LIBS) \
+-	$(LIBINTL) \
++	$(LTLIBINTL) \
+ 	$(BOOST_LIBS) \
+ 	$(OPENGL_LIBS) \
+ 	$(PTHREAD_LIBS) \
+--- origsrc/gnash-0.8.10/plugin/klash4/Makefile.am	2012-01-19 13:17:50.000000000 -0600
++++ src/gnash-0.8.10/plugin/klash4/Makefile.am	2012-03-17 22:06:45.405658400 -0500
+@@ -38,7 +38,8 @@ plugin_LTLIBRARIES= libklashpart.la
+ 
+ libklashpart_la_SOURCES = klash_part.cpp klash_part.h
+ libklashpart_la_DEPENDENCIES = klash_part.moc
+-libklashpart_la_LDFLAGS = -module -avoid-version -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
++libklashpart_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir)
++libklashpart_la_LIBADD = $(KDE4_LIBS) $(QT4_LIBS)
+ 
+ dist_kde_services_DATA = klash_part.desktop
+ dist_kde_rc_DATA = klashpartui.rc
+--- origsrc/gnash-0.8.10/plugin/npapi/Makefile.am	2012-01-19 13:17:50.000000000 -0600
++++ src/gnash-0.8.10/plugin/npapi/Makefile.am	2012-03-18 00:08:28.265339000 -0500
+@@ -78,7 +78,7 @@ libgnashplugin_la_SOURCES  = plugin.cpp
+ 
+ libgnashplugin_la_LIBADD   = \
+ 	$(GLIB_LIBS) \
+-	-lboost_iostreams \
++	-lboost_iostreams-mt \
+ 	$(NULL)
+ 
+ # Scriptable plugin support
+@@ -101,7 +101,7 @@ libgnashplugin_la_SOURCES += pluginScrip
+ check:
+ 	./test
+ 
+-libgnashplugin_la_LDFLAGS = -module -avoid-version -L$(plugindir)
++libgnashplugin_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir)
+ 
+ if VISIBILITY_WORKS
+ libgnashplugin_la_CXXFLAGS = -fvisibility=hidden
+@@ -128,11 +128,7 @@ if !AMIGAOS4
+ install-plugin install-plugins: $(plugin_LTLIBRARIES) $(PKGLIB)
+ 	@test -d "$(DESTDIR)$(plugindir)" || $(mkinstalldirs) "$(DESTDIR)$(plugindir)"
+ 	@echo "Installing plugin to $(DESTDIR)$(plugindir)"
+-	@if test -d .libs; then \
+-	  cp -f .libs/libgnashplugin.so* $(DESTDIR)$(plugindir)/libgnashplugin.so; \
+-	else \
+-	  cp -f libgnashplugin.so* $(DESTDIR)$(plugindir)/libgnashplugin.so; \
+-	fi
++	$(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $(plugin_LTLIBRARIES) $(DESTDIR)$(plugindir)
+ else
+ install-plugin install-plugins: 
+ 	: # do nothing

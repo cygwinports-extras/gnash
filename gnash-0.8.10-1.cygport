@@ -3,32 +3,25 @@ HOMEPAGE="http://www.gnu.org/software/gnash/"
 SRC_URI="mirror://gnu/${PN}/${PV}/${P}.tar.bz2"
 
 PATCH_URI="
-	mirror://portage/www-plugins/${PN}/files/${P}-ffmpeg-detection.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-libavcodec-version.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-look-harder-for-version_h.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-audio-resample.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-decode-audio.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-decode-video.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avcodec-parser.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-no-deprecated-avformat-metadata.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-cygnal-sshclient.patch
-	mirror://portage/www-plugins/${PN}/files/${P}-cve-2011-4328.patch
+	mirror://portage/www-plugins/${PN}/files/${PN}-0.8.10-gettext-macro.patch
+	mirror://portage/www-plugins/${PN}/files/${PN}-0.8.10-amf-include.patch
+	mirror://portage/www-plugins/${PN}/files/${PN}-0.8.10-npapi-sdk.patch
+	mirror://portage/www-plugins/${PN}/files/${PN}-0.8.10-cve-2012-1175.patch
 	0.8.7-configure.patch
 	0.8.7-cygwin.patch
-	0.8.7-jemalloc.patch
-	0.8.9-kde4.patch
-	0.8.9-no-undefined.patch
 	0.8.9-gettext018.patch
+	0.8.10-kde4.patch
+	0.8.10-no-undefined.patch
 "
 
 # without working shared libraries, a -devel package isn't very useful
 PKG_NAMES="${PN} kde4-gnash" # ${PN}-devel
 PKG_HINTS="setup kde4"
-gnash_CONTENTS="--exclude=gnash-qt-* --exclude=kde4* --exclude=klash*
+gnash_CONTENTS="--exclude=gnash-qt-* --exclude=qt4* --exclude=klash*
                 etc/ usr/bin/ usr/lib/mozilla/ usr/share/"
-kde4_gnash_CONTENTS="usr/bin/gnash-qt-launcher usr/bin/kde4-gnash.exe usr/lib/kde4/
+kde4_gnash_CONTENTS="usr/bin/gnash-qt-launcher usr/bin/qt4-gnash.exe usr/lib/kde4/
                      usr/share/applications/klash.desktop usr/share/icons/*/*/*/klash.*
-                     usr/share/kde4/ usr/share/man/man1/gnash-qt-* usr/share/man/man1/kde4*"
+                     usr/share/kde4/ usr/share/man/man1/gnash-qt-* usr/share/man/man1/qt4*"
 PKG_IGNORE="usr/include/ usr/lib/gnash/lib* usr/lib/pkgconfig/"
 
 DIFF_EXCLUDES="libltdl ltdl.m4"
@@ -68,7 +61,7 @@ src_install() {
 	# .la files are removed by install-exec-local, so no auto-fixups
 #	mv ${D}/usr/lib/bin/* ${D}/usr/bin/
 
-	make_etc_defaults /etc/gnashrc /etc/gnashpluginrc
+	make_etc_defaults /etc
 
 	rm -f ${D}/usr/lib/kde4/*.{a,la}
 	# KDE4 plugins must use "lib" prefix if prefixed at all
