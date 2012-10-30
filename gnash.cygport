@@ -1,4 +1,14 @@
-DESCRIPTION="GNU Flash player"
+NAME="gnash"
+VERSION=0.8.10
+RELEASE=2
+CATEGORY="Video Web"
+SUMMARY="GNU Flash movie player and browser plugin"
+DESCRIPTION="Gnash is a GNU Flash movie player. Flash is an animation file
+format pioneered by Macromedia which continues to be supported by their
+successor company, Adobe. Flash has been extended to include audio and video
+content, and programs written in ActionScript, an ECMAScript-compatible
+language. Gnash is based on GameSWF, and supports most SWF v7 features and
+some SWF v8 and v9."
 HOMEPAGE="http://www.gnu.org/software/gnash/"
 SRC_URI="mirror://gnu/${PN}/${PV}/${P}.tar.bz2"
 
@@ -16,9 +26,9 @@ PATCH_URI="
 
 # without working shared libraries, a -devel package isn't very useful
 PKG_NAMES="${PN} kde4-gnash" # ${PN}-devel
-PKG_HINTS="setup kde4"
 gnash_CONTENTS="--exclude=gnash-qt-* --exclude=qt4* --exclude=klash*
                 etc/ usr/bin/ usr/lib/mozilla/ usr/share/"
+kde4_gnash_SUMMARY="KDE flash player and Konqueror plugin"
 kde4_gnash_CONTENTS="usr/bin/gnash-qt-launcher usr/bin/qt4-gnash.exe usr/lib/kde4/
                      usr/share/applications/klash.desktop usr/share/icons/*/*/*/klash.*
                      usr/share/kde4/ usr/share/man/man1/gnash-qt-* usr/share/man/man1/qt4*"
