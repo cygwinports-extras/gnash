@@ -1,6 +1,6 @@
 NAME="gnash"
 VERSION=0.8.10
-RELEASE=2
+RELEASE=3
 CATEGORY="Video Web"
 SUMMARY="GNU Flash movie player and browser plugin"
 DESCRIPTION="Gnash is a GNU Flash movie player. Flash is an animation file
@@ -22,6 +22,7 @@ PATCH_URI="
 	0.8.9-gettext018.patch
 	0.8.10-kde4.patch
 	0.8.10-no-undefined.patch
+	0.8.10-boost1_50.patch
 "
 
 # without working shared libraries, a -devel package isn't very useful
