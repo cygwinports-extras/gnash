@@ -1,6 +1,6 @@
 NAME="gnash"
 VERSION=0.8.10
-RELEASE=3
+RELEASE=4
 CATEGORY="Video Web"
 SUMMARY="GNU Flash movie player and browser plugin"
 DESCRIPTION="Gnash is a GNU Flash movie player. Flash is an animation file
@@ -17,6 +17,7 @@ PATCH_URI="
 	mirror://portage/www-plugins/${PN}/files/${PN}-0.8.10-amf-include.patch
 	mirror://portage/www-plugins/${PN}/files/${PN}-0.8.10-npapi-sdk.patch
 	mirror://portage/www-plugins/${PN}/files/${PN}-0.8.10-cve-2012-1175.patch
+	http://pkgs.fedoraproject.org/cgit/gnash.git/plain/gnash-0.8.10-add-unistd-header.patch
 	0.8.7-configure.patch
 	0.8.7-cygwin.patch
 	0.8.9-gettext018.patch
