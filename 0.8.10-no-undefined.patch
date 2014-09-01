@@ -34,15 +34,6 @@
  dist_kde_rc_DATA = klashpartui.rc
 --- origsrc/gnash-0.8.10/plugin/npapi/Makefile.am	2012-01-19 13:17:50.000000000 -0600
 +++ src/gnash-0.8.10/plugin/npapi/Makefile.am	2012-03-18 00:08:28.265339000 -0500
-@@ -78,7 +78,7 @@ libgnashplugin_la_SOURCES  = plugin.cpp
- 
- libgnashplugin_la_LIBADD   = \
- 	$(GLIB_LIBS) \
--	-lboost_iostreams \
-+	-lboost_iostreams-mt \
- 	$(NULL)
- 
- # Scriptable plugin support
 @@ -101,7 +101,7 @@ libgnashplugin_la_SOURCES += pluginScrip
  check:
  	./test
