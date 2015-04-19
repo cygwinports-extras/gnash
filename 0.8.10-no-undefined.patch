@@ -27,7 +27,7 @@
  libklashpart_la_SOURCES = klash_part.cpp klash_part.h
  libklashpart_la_DEPENDENCIES = klash_part.moc
 -libklashpart_la_LDFLAGS = -module -avoid-version -L$(plugindir) $(KDE4_LIBS) $(QT4_LIBS)
-+libklashpart_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir)
++libklashpart_la_LDFLAGS = -module -avoid-version -no-undefined -shared -L$(plugindir)
 +libklashpart_la_LIBADD = $(KDE4_LIBS) $(QT4_LIBS)
  
  dist_kde_services_DATA = klash_part.desktop
@@ -39,7 +39,7 @@
  	./test
  
 -libgnashplugin_la_LDFLAGS = -module -avoid-version -L$(plugindir)
-+libgnashplugin_la_LDFLAGS = -module -avoid-version -no-undefined -L$(plugindir)
++libgnashplugin_la_LDFLAGS = -module -avoid-version -no-undefined -shared -L$(plugindir)
  
  if VISIBILITY_WORKS
  libgnashplugin_la_CXXFLAGS = -fvisibility=hidden
