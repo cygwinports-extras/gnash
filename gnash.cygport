@@ -1,6 +1,6 @@
 NAME="gnash"
 VERSION=0.8.10
-RELEASE=6
+RELEASE=7
 CATEGORY="Video Web"
 SUMMARY="GNU Flash movie player and browser plugin"
 DESCRIPTION="Gnash is a GNU Flash movie player. Flash is an animation file
